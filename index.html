@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom T-Shirt & Hoodie Ordering</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root{--bg:#000;--panel:#0d0d0d;--line:#262626;--text:#fff;--muted:#b5b5b5;--green:#2ed573;--blue:#4da3ff}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1180px;margin:0 auto;padding:20px}.card{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px}
+    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}.hero-copy .l1,.hero-copy .l2{font-weight:900}
+    .hero-copy .l1{font-size:clamp(26px,3.5vw,42px);line-height:1.1}.hero-copy .l2{font-size:clamp(20px,2.8vw,32px);line-height:1.1;color:var(--green);margin-top:10px}
+    .hero-copy .l3{font-size:19px;color:#ddd;margin-top:10px}
+    .hero-image{min-height:250px;border:1px dashed #3a3a3a;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#898989;background:#121212;position:relative;overflow:hidden} .hero-main-image{width:100%;height:100%;min-height:250px;object-fit:cover;display:block}
+    .site-logo{position:absolute;top:12px;left:12px;width:82px;height:82px;object-fit:cover;border:1px solid #444;border-radius:8px;background:#111}
+    .row{display:flex;gap:10px;flex-wrap:wrap}.color-input{appearance:none;-webkit-appearance:none;width:56px;height:34px;border:1px solid #444;border-radius:7px;padding:0;background:none;cursor:pointer}.color-input::-webkit-color-swatch-wrapper{padding:0}.color-input::-webkit-color-swatch{border:none;border-radius:6px}.color-input::-moz-color-swatch{border:none;border-radius:6px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    label{display:block;margin:8px 0 4px;color:#d0d0d0;font-size:13px}input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#090909;color:#fff}
+    .btn{padding:9px 13px;border-radius:10px;border:1px solid #3d3d3d;background:#1a1a1a;color:#fff;font-weight:700;cursor:pointer}.btn.primary{background:var(--green);color:#05311a}.btn.secondary{background:var(--blue);color:#001d40}
+    .hidden{display:none!important}.muted{color:var(--muted)} .viewer{display:grid;grid-template-columns:2fr 1fr;gap:12px} #viewer3d{position:relative;min-height:460px;border:1px solid #333;border-radius:12px;background:#111}
+    .arrow-pad{display:grid;grid-template-columns:36px 36px 36px;grid-template-rows:36px 36px 36px;gap:6px;align-items:center;justify-content:start}.stack-col{display:flex;flex-direction:column;gap:6px}.asset-list{max-height:110px;overflow:auto;border:1px solid #2e2e2e;border-radius:8px;padding:6px;margin-top:8px}.asset-item{display:flex;justify-content:space-between;align-items:center;padding:6px;border:1px solid #2a2a2a;border-radius:7px;margin-bottom:6px;background:#111}
+    .size-table{width:100%;border-collapse:collapse}.size-table th,.size-table td{border:1px solid #2d2d2d;padding:8px}.stepper{display:flex;gap:5px;align-items:center}.mini{width:26px;height:26px;border:1px solid #444;background:#171717;color:#fff;border-radius:6px;cursor:pointer}.stepper input{width:52px;text-align:center;padding:6px}
+    .price-wide{border:1px solid #1d5d3f;background:#0b2419;border-radius:12px;padding:14px}.price-wide p{margin:6px 0}.qa{border:none;padding:0;margin:0;background:transparent;border-bottom:1px solid #2b2b2b;border-radius:0;box-shadow:none} .qa summary{cursor:pointer;list-style:none;padding:12px 2px;font-weight:700;outline:none;border:none;box-shadow:none;background:transparent} .qa summary::-webkit-details-marker{display:none} .qa summary:focus,.qa summary:focus-visible,.qa:focus-within{outline:none;border:none;box-shadow:none;background:transparent} details.qa[open] summary{color:#9ad0ff} .qa p{padding:0 2px 12px 2px;margin:0}
+    @media (max-width:960px){.hero,.viewer,.grid-2,.grid-3{grid-template-columns:1fr}}
+  </style>
+</head>
+<body><div class="wrap">
+<section class="card hero"><div class="hero-copy">
+<div class="l1">Make Your Design.<br>Wear Your Story.</div>
+<div class="l2">Lowest Price in the U.S.<br>+ Real Price Match</div>
+<div class="l3">Found a lower quote? Email me and I will beat it.</div>
+</div><div class="hero-image"><img class="site-logo" src="https://tees.wulibing.me/wp-content/uploads/2026/05/cropped-lmt.png" alt="LeeMakesTees logo"><img class="hero-main-image" src="https://tees.wulibing.me/wp-content/uploads/2026/05/ChatGPT-Image-May-17-2026-05_49_52-PM.png" alt="Custom tees hero image"></div></section>
+
+<section class="card" id="step1"><h2>Step 1 — Choose Design Service</h2><div class="row"><button class="btn primary" id="chooseSelfBtn" onclick="chooseDesign('self')">Design It Myself (Free)</button><button class="btn secondary" id="chooseStudioBtn" onclick="chooseDesign('studio')">Lee Designs It for Me ($100)</button></div><p id="status" class="muted"></p></section>
+
+<section class="card hidden" id="studioStep"><h2>Step 2 — Tell Me Your Design Idea</h2><p class="muted">After you submit this form, I will email you my design draft for your approval.</p><label>Item Type</label><select id="studioItemType" onchange="setOrderItemType(this.value);refreshMaterialOptions();document.getElementById('material').value='blend';updatePrice()"><option value="tshirt">T-Shirt</option><option value="hoodie">Hoodie</option></select><label>Upload reference images (optional, up to 5 files, 20MB each)</label><input type="file" id="studioImage" accept="image/*" multiple><p class="muted">If your files are too large, email leemakestees@gmail.com directly.</p><label>Design notes</label><textarea id="studioNotes" style="min-height:160px"></textarea><div class="row"><button class="btn primary" onclick="goSizeFromStudio()">Next</button></div></section>
+<section class="card hidden" id="selfStep"><h2>Step 2 — Build Your Design</h2><p class="muted">If the 3D preview does not load, or the tools below cannot create the exact effect you want, please email me at leemakestees@gmail.com with your design request. All garments are unisex.</p><div class="viewer"><div id="viewer3d"><div id="viewerStatus" style="position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);border:1px solid #3a3a3a;padding:6px 8px;border-radius:8px;color:#ddd;font-size:12px;z-index:5">Loading 3D preview...</div></div><div>
+<label>Item Type</label><select id="itemType" onchange="setOrderItemType(this.value);selectedLayer=-1;refreshLayerList();apply3DChanges();refreshMaterialOptions();document.getElementById('material').value='blend';updatePrice()"><option value="tshirt">T-Shirt</option><option value="hoodie">Hoodie</option></select>
+<label>Clothing Color</label><input type="color" class="color-input" id="shirtColor" value="#ffffff" oninput="updateModelBaseColor();apply3DChanges()" onchange="updateModelBaseColor();apply3DChanges()">
+<label>Custom Text</label><input type="text" id="customText">
+<div class="grid-2"><div><label>Text Color</label><input type="color" class="color-input" id="textColor" value="#111111" oninput="updateSelectedTextStyle()"></div><div><label>Font</label><select id="fontFamily" onchange="updateSelectedTextStyle()"><option>Arial</option><option>Impact</option><option>Times New Roman</option></select></div></div><label>Add To Surface</label><select id="addSurface"><option value="front">Front</option><option value="back">Back</option><option value="left_shoulder">Left Shoulder</option><option value="right_shoulder">Right Shoulder</option></select>
+<div class="muted" style="margin-top:6px;font-size:12px">If Add To Surface does not match your model UVs, send me your UV coordinates and I will map them precisely.</div><button class="btn" style="margin-top:6px" onclick="addTextLayer()">Add Text</button>
+<label>Upload custom images (multiple, max 20MB each) — added to selected surface</label><input type="file" id="customImage" accept="image/*" multiple onchange="onCustomImagesUpload(event)">
+<label>Layers on shirt</label><div id="assetList" class="asset-list"></div>
+<div class="arrow-pad"><div></div><button class="btn" onclick="moveLayer(0,-20)">↑</button><div></div><button class="btn" onclick="moveLayer(-20,0)">←</button><button class="btn" onclick="moveLayer(0,20)">↓</button><button class="btn" onclick="moveLayer(20,0)">→</button><div></div><div></div><div></div></div><div class="grid-2" style="margin-top:8px"><div class="stack-col"><button class="btn" onclick="scaleLayer(1.1)">Scale +</button><button class="btn" onclick="scaleLayer(0.9)">Scale -</button></div><div class="stack-col"><button class="btn" onclick="rotateLayer(10)">Rotate +</button><button class="btn" onclick="rotateLayer(-10)">Rotate -</button></div></div>
+<div class="row" style="margin-top:8px"><button class="btn" onclick="toggleUVDebug()" id="uvBtn">UV Debug: Off</button></div><div class="row" style="margin-top:10px"><button class="btn primary" onclick="goSizeFromSelf()">Next</button></div></div></div></section>
+<section class="card hidden" id="sizeStep"><h2>Step 3 — Size, Quantity, Material</h2><button class="btn" onclick="toggleKidsSizes()" id="kidsBtn">Add Kids Sizes</button>
+<table class="size-table"><thead><tr><th>Size</th><th>Height (ft)</th><th>Height (cm)</th><th>Weight (lb)</th><th>Weight (kg)</th><th>Quantity</th></tr></thead><tbody id="sizeBody"></tbody></table><p class="muted">Note: If your height and weight do not match the same size row, prioritize weight.</p>
+<label>Material</label><select id="material" onchange="updatePrice()"><option value="blend">Cotton-Poly Blend</option><option value="cooling">Cooling Fabric</option><option value="cotton">100% Cotton</option><option value="premium">Premium Heavyweight</option></select><div class="row"><button class="btn primary" onclick="goCustomerStep()">Next</button></div></section>
+<section class="card hidden" id="customerStep"><h2>Step 4 — Contact & Shipping</h2>
+<div class="grid-2"><div><label>Name</label><input id="name"></div><div><label>Email</label><input id="email" type="email"></div><div><label>Phone</label><input id="phone"></div><div><label>Country</label><select id="country" onchange="populateStates();updatePrice()"><option>United States</option><option>Canada</option></select></div></div>
+<div class="grid-2"><div><label>Address Line 1</label><input id="addr1" list="addr1Suggestions" autocomplete="off" oninput="suggestAddress(this.value)" onchange="applyAddressSuggestion();refreshQuoteTax()"><datalist id="addr1Suggestions"></datalist></div><div><label>Address Line 2 (optional)</label><input id="addr2"></div></div>
+<div class="grid-3"><div><label>City</label><input id="city" onchange="refreshQuoteTax()"></div><div><label>State / Province</label><select id="state" onchange="updatePrice();refreshQuoteTax()"><option value="">Select state / province</option></select></div><div><label>ZIP / Postal Code</label><input id="zip" onchange="updatePrice();refreshQuoteTax()"></div></div>
+<div class="row"><button class="btn primary" id="confirmBtn" onclick="finalizeOrder()">Confirm</button><span id="confirmHint" class="muted" style="align-self:center"></span></div></section>
+<section class="card hidden" id="payStep"><h2>Step 5 — Payment</h2><p>Your order number: <strong id="orderNumber"></strong></p><div class="row"><button class="btn secondary" onclick="payNow()">Pay by PayPal Now</button><button class="btn" onclick="emailBeforePay()">Question Before Payment?</button></div><p id="paymentNote" class="muted"></p></section>
+<section class="card price-wide"><h2>Live Price (USD)</h2>
+<p>Item Type: <span id="priceItemType">T-Shirt</span></p>
+<p>Material: <span id="priceMaterial">100% Cotton</span></p>
+<p>Unit Price: <span id="unitPrice">$0.00 / $0.00</span></p>
+<p>Quantity: <span id="priceQty">0</span></p>
+<p>Items Total (Unit × Qty): <span id="baseCost">$0.00</span></p>
+<p>Quantity Discount: <span id="qtyDiscount">0% (No discount)</span></p>
+<p>Items Total After Discount: <span id="discountedBaseCost">$0.00</span></p>
+<p>Design service fee: <span id="designFee">$0.00</span></p>
+<p>Subtotal (before tax): <span id="subtotal">$0.00</span></p>
+<p>Tax rate: <span id="taxRate">Unknown (0%)</span></p>
+<p>Tax amount: <span id="tax">$0.00</span></p>
+<p><strong>Total: <span id="livePrice">$0.00</span></strong></p>
+<p class="muted" style="margin-top:10px">Quantity discount rules:<br>12–23: 5% off;<br>24–49: 10% off;<br>50–99: 15% off;<br>100+ shirts: 20% off or you can contact me for customized pricing</p></section>
+<section class="card"><h2>FAQ</h2><details class="qa"><summary><strong>Do you accept rush orders?</strong></summary><p class="muted">No. Delivery time is 30 days from payment date. I run a one-person studio, with help from my wife.</p></details><details class="qa"><summary><strong>How does price match work?</strong></summary><p class="muted">If you find a cheaper U.S.-based offer, email me with details and I will provide a lower price.</p></details><details class="qa"><summary><strong>Can you customize items other than T-shirts and hoodies?</strong></summary><p class="muted">Yes. I can often customize other apparel, bags, hats, and more. Please email me to ask.</p></details><details class="qa"><summary><strong>Can you make sports team uniforms?</strong></summary><p class="muted">Yes. I can customize many types of sports uniforms. Please email me for details.</p></details><details class="qa"><summary><strong>What payment methods do you accept?</strong></summary><p class="muted">I accept PayPal, credit card, Venmo, Cash App, Zelle, and more. Just ask.</p></details><details class="qa"><summary><strong>Where are you located?</strong></summary><p class="muted">I live in Buffalo, NY.</p></details><details class="qa"><summary><strong>What is the minimum order quantity?</strong></summary><p class="muted">1.</p></details><details class="qa"><summary><strong>Can I see a mockup before I pay?</strong></summary><p class="muted">I will always email for approval even if you design yourself.</p></details><details class="qa"><summary><strong>How many revision rounds are included?</strong></summary><p class="muted">Till you love it.</p></details><details class="qa"><summary><strong>What is your return/refund policy?</strong></summary><p class="muted">No return/refund since they are customized.</p></details><details class="qa"><summary><strong>How much is shipping and do you offer free shipping tiers?</strong></summary><p class="muted">Usually free, but I will reach out if there is a cost.</p></details><details class="qa"><summary><strong>Do you ship outside the U.S. and Canada?</strong></summary><p class="muted">Possibly. Please email me to confirm destination and shipping options.</p></details></section>
+<section class="card" style="text-align:center"><h2>Contact</h2><p><a href="mailto:leemakestees@gmail.com">leemakestees@gmail.com</a></p></section>
+</div>
+
+<script>
+(function(){
+  function scrollToEl(id){
+    var el=document.getElementById(id);
+    if(!el) return;
+    window.scrollTo({top:el.getBoundingClientRect().top+window.pageYOffset-12,behavior:'smooth'});
+  }
+  function chooseDesignBootstrap(mode){
+    var status=document.getElementById('status');
+    var studio=document.getElementById('studioStep');
+    var self=document.getElementById('selfStep');
+    if(status){
+      status.textContent = mode==='studio' ? 'Selected: Lee designs it for you ($100).' : 'Selected: You design it yourself (free).';
+    }
+    if(studio) studio.classList.toggle('hidden', mode!=='studio');
+    if(self) self.classList.toggle('hidden', mode!=='self');
+    scrollToEl(mode==='studio'?'studioStep':'selfStep');
+  }
+  window.chooseDesign = function(mode){
+    chooseDesignBootstrap(mode);
+    if(typeof window.__chooseDesignMain==='function'){
+      window.__chooseDesignMain(mode);
+    }
+  };
+  // Fallbacks in case main script is partially blocked by editor/security filters.
+  window.goSizeFromStudio = function(){
+    if(typeof window.__goSizeFromStudioMain==='function') return window.__goSizeFromStudioMain();
+    var notes=document.getElementById('studioNotes');
+    if(notes && !notes.value.trim()){ alert('Please add design notes before continuing.'); return; }
+    var size=document.getElementById('sizeStep');
+    if(size){ size.classList.remove('hidden'); scrollToEl('sizeStep'); }
+  };
+  window.goSizeFromSelf = function(){
+    if(typeof window.__goSizeFromSelfMain==='function') return window.__goSizeFromSelfMain();
+    var size=document.getElementById('sizeStep');
+    if(size){ size.classList.remove('hidden'); scrollToEl('sizeStep'); }
+  };
+})();
+</script>
+
+<script>
+const order={designMode:null,itemType:'tshirt',designFee:0,qty:0,total:0,subtotal:0,tax:0,baseCost:0,orderNumber:null};let confirmSubmitting=false;let orderFinalized=false;
+const designLayers={tshirt:[],hoodie:[]};let selectedLayer=-1;let uvDebug=false;let selfUploadFiles=[];const usStates=['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']; const caProvinces=['AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT']; const taxRates={CA:0.0825,NY:0.0875,TX:0.0625,FL:0.06,WA:0.065,AK:0,DE:0,MT:0,NH:0,OR:0};
+function scrollToId(id){const el=document.getElementById(id);window.scrollTo({top:el.getBoundingClientRect().top+window.pageYOffset-12,behavior:'smooth'})}
+function showStep(id){const el=document.getElementById(id);if(!el)return;el.classList.remove('hidden');if(id==='payStep'){el.scrollIntoView({behavior:'smooth',block:'start'});}else{scrollToId(id);}}
+window.__chooseDesignMain=function(mode){order.designMode=mode;order.designFee=mode==='studio'?100:0;document.getElementById('status').textContent=mode==='studio'?'Selected: Lee designs it for you ($100).':'Selected: You design it yourself (free).';document.getElementById('studioStep').classList.toggle('hidden',mode!=='studio');document.getElementById('selfStep').classList.toggle('hidden',mode!=='self');if(mode==='self'){const v=order.itemType||'tshirt';const sel=document.getElementById('itemType');if(sel)sel.value=v;setOrderItemType(v);showStep('selfStep');setTimeout(()=>{init3D();forceResize3D();},60);}else{const v=order.itemType||'tshirt';const sel=document.getElementById('studioItemType');if(sel)sel.value=v;setOrderItemType(v);showStep('studioStep');}refreshMaterialOptions();const m=document.getElementById('material');if(m)m.value='blend';updatePrice()}
+const fit={XS:["5 ft 3 in - 5 ft 6 in","160-167","110-130","50-59"],S:["5 ft 6 in - 5 ft 8 in","168-174","130-150","59-68"],M:["5 ft 9 in - 5 ft 11 in","175-180","150-170","68-77"],L:["5 ft 11 in - 6 ft 1 in","181-186","170-195","77-88"],XL:["6 ft 1 in - 6 ft 3 in","187-192","195-220","88-100"],"2XL":["6 ft 4 in - 6 ft 6 in","193-198","220-250","100-113"],"3XL":["6 ft 6 in - 6 ft 9 in","199-205","250-290","113-132"],"Youth XS":["3 ft 8 in - 4 ft 1 in","112-124","40-55","18-25"],"Youth S":["4 ft 0 in - 4 ft 5 in","122-135","50-65","23-29"],"Youth M":["4 ft 4 in - 4 ft 9 in","132-145","60-80","27-36"],"Youth L":["4 ft 8 in - 5 ft 2 in","142-157","75-100","34-45"]};
+function sizeRow(size,id){const g=fit[size]||['-','-','-','-'];return `<tr><td>${size}</td><td>${g[0]}</td><td>${g[1]}</td><td>${g[2]}</td><td>${g[3]}</td><td><div class="stepper"><button class="mini" onclick="changeQty('${id}',-1)">-</button><input id="${id}" type="number" min="0" step="1" value="0" oninput="onQtyInput(this)"><button class="mini" onclick="changeQty('${id}',1)">+</button></div></td></tr>`}
+function renderSizes(kids=false){const sizes=['XS','S','M','L','XL','2XL','3XL'];const kidSizes=kids?['Youth XS','Youth S','Youth M','Youth L']:[];document.getElementById('sizeBody').innerHTML=[...sizes,...kidSizes].map((s,i)=>sizeRow(s,`q${i}`)).join('')}
+let kidsShown=false;function toggleKidsSizes(){kidsShown=!kidsShown;renderSizes(kidsShown);document.getElementById('kidsBtn').textContent=kidsShown?'Hide Kids Sizes':'Add Kids Sizes';updatePrice()}
+function onQtyInput(el){const v=Math.max(0,parseInt(el.value||'0',10)||0);el.value=String(v);updatePrice()}
+function changeQty(id,d){const el=document.getElementById(id);el.value=Math.max(0,(parseInt(el.value)||0)+d);updatePrice()}
+function getQtyDetails(){const rows=[...document.querySelectorAll('#sizeBody tr')];let adult=0,youth=0;for(const r of rows){const label=(r.children[0]?.textContent||'').trim();const inp=r.querySelector('input');const q=parseInt(inp?.value||'0',10)||0;if(label.toLowerCase().startsWith('youth')) youth+=q; else adult+=q;}return {adult,youth,total:adult+youth};}
+function getQty(){return getQtyDetails().total}
+function calcTax(subtotal){const st=document.getElementById('state').value;if(!st) return {rate:0,known:false};const known=Object.prototype.hasOwnProperty.call(taxRates,st);const rate=known?taxRates[st]:0;return {rate,known}}
+function updatePrice(){const it=getSelectedItemType();const m=document.getElementById('material')?.value||'blend';const tshirt={blend:19,cooling:25,cotton:35,premium:49};const hoodie={blend:45,cooling:69,cotton:79,premium:99,thermal:119};const unit=(it==='hoodie'?hoodie:tshirt)[m]||0;order.qty=getQty();order.baseCost=unit*order.qty;order.subtotal=order.baseCost+order.designFee;const taxInfo=calcTax(order.subtotal);order.tax=order.subtotal*taxInfo.rate;order.total=order.subtotal+order.tax;const itemLabel=it==='hoodie'?'Hoodie':'T-Shirt';const matSel=document.getElementById('material');const matLabel=matSel?.options?.[matSel.selectedIndex]?.text||m;document.getElementById('priceItemType').textContent=itemLabel;document.getElementById('priceMaterial').textContent=matLabel;document.getElementById('unitPrice').textContent='$'+unit.toFixed(2);document.getElementById('priceQty').textContent=String(order.qty);document.getElementById('baseCost').textContent='$'+order.baseCost.toFixed(2);document.getElementById('qtyDiscount').textContent=(discountRate*100).toFixed(0)+'%'+(discountRate?' off':' (No discount)');document.getElementById('discountedBaseCost').textContent='$'+order.discountedBaseCost.toFixed(2);document.getElementById('designFee').textContent='$'+order.designFee.toFixed(2);document.getElementById('subtotal').textContent='$'+order.subtotal.toFixed(2);document.getElementById('taxRate').textContent=taxInfo.known?(taxInfo.rate*100).toFixed(2)+'%':'Unknown (0%)';document.getElementById('tax').textContent='$'+order.tax.toFixed(2);document.getElementById('livePrice').textContent='$'+order.total.toFixed(2)}
+window.__goSizeFromStudioMain=function(){const notes=document.getElementById('studioNotes').value.trim();if(!notes){alert('Please add design notes before continuing.');return;}setOrderItemType(document.getElementById('studioItemType')?.value||order.itemType||'tshirt');refreshMaterialOptions();updatePrice();showStep('sizeStep')}
+function currentLayers(){const t=document.getElementById('itemType')?.value||'tshirt';return designLayers[t];}
+function getDefaultPos(item,surf){const map={tshirt:{front:[704,384],back:[192,576],right_shoulder:[128,128],left_shoulder:[704,832]},hoodie:{front:[704,768],back:[192,128],left_shoulder:[576,192],right_shoulder:[320,704]}};return (map[item]&&map[item][surf])?map[item][surf]:[512,512];}
+window.__goSizeFromSelfMain=function(){setOrderItemType(document.getElementById('itemType')?.value||order.itemType||'tshirt');refreshMaterialOptions();updatePrice();showStep('sizeStep')}
+function goCustomerStep(){if(getQty()<=0){alert('Please select at least 1 quantity before continuing.');return;}showStep('customerStep')}
+function populateStates(){const c=document.getElementById('country').value;const opts=['<option value="">Select state / province</option>'].concat((c==='Canada'?caProvinces:usStates).map(v=>`<option value="${v}">${v}</option>`));document.getElementById('state').innerHTML=opts.join('');updatePrice()}
+
+
+let addrSuggestionMap={};
+let addrSuggestTimer=null;
+const usStateNameToCode={ALABAMA:'AL',ALASKA:'AK',ARIZONA:'AZ',ARKANSAS:'AR',CALIFORNIA:'CA',COLORADO:'CO',CONNECTICUT:'CT',DELAWARE:'DE',FLORIDA:'FL',GEORGIA:'GA',HAWAII:'HI',IDAHO:'ID',ILLINOIS:'IL',INDIANA:'IN',IOWA:'IA',KANSAS:'KS',KENTUCKY:'KY',LOUISIANA:'LA',MAINE:'ME',MARYLAND:'MD',MASSACHUSETTS:'MA',MICHIGAN:'MI',MINNESOTA:'MN',MISSISSIPPI:'MS',MISSOURI:'MO',MONTANA:'MT',NEBRASKA:'NE',NEVADA:'NV','NEW HAMPSHIRE':'NH','NEW JERSEY':'NJ','NEW MEXICO':'NM','NEW YORK':'NY','NORTH CAROLINA':'NC','NORTH DAKOTA':'ND',OHIO:'OH',OKLAHOMA:'OK',OREGON:'OR',PENNSYLVANIA:'PA','RHODE ISLAND':'RI','SOUTH CAROLINA':'SC','SOUTH DAKOTA':'SD',TENNESSEE:'TN',TEXAS:'TX',UTAH:'UT',VERMONT:'VT',VIRGINIA:'VA',WASHINGTON:'WA','WEST VIRGINIA':'WV',WISCONSIN:'WI',WYOMING:'WY'};
+const caProvinceNameToCode={ALBERTA:'AB','BRITISH COLUMBIA':'BC',MANITOBA:'MB','NEW BRUNSWICK':'NB','NEWFOUNDLAND AND LABRADOR':'NL','NOVA SCOTIA':'NS','NORTHWEST TERRITORIES':'NT',NUNAVUT:'NU',ONTARIO:'ON','PRINCE EDWARD ISLAND':'PE',QUEBEC:'QC',SASKATCHEWAN:'SK',YUKON:'YT'};
+function normalizeStateCode(raw,country){
+  const v=(raw||'').toString().trim();
+  if(!v) return '';
+  const fromIso=v.includes('-')?v.split('-').pop():v;
+  if(fromIso.length===2) return fromIso.toUpperCase();
+  const key=fromIso.toUpperCase();
+  if((country||'').toLowerCase().includes('canada')) return caProvinceNameToCode[key]||'';
+  return usStateNameToCode[key]||'';
+}
+function toSuggestionLabel(a){
+  const road=[a.house_number,a.road].filter(Boolean).join(' ').trim();
+  const city=(a.city||a.town||a.village||a.hamlet||'').replace(/^Town of\s+/i,'').replace(/^City of\s+/i,'').trim();
+  const state=normalizeStateCode(a.state_code||a.state,document.getElementById('country').value||'United States');
+  const zip=(a.postcode||'').trim();
+  const pieces=[road,city,state,zip].filter(Boolean);
+  return pieces.join(', ');
+}
+async function suggestAddress(q){
+  clearTimeout(addrSuggestTimer);
+  if((q||'').trim().length<4){document.getElementById('addr1Suggestions').innerHTML='';addrSuggestionMap={};return;}
+  addrSuggestTimer=setTimeout(async()=>{
+    try{
+      const c=(document.getElementById('country').value||'United States').toLowerCase().includes('canada')?'ca':'us';
+      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes='+c+'&q='+encodeURIComponent(q);
+      const res=await fetch(url,{headers:{'Accept':'application/json'}});
+      const data=await res.json();
+      addrSuggestionMap={};
+      const seen=new Set();
+      const opts=[];
+      for(const d of (data||[])){
+        const label=toSuggestionLabel(d.address||{});
+        if(!label||seen.has(label)) continue;
+        seen.add(label);
+        addrSuggestionMap[label]=d;
+        opts.push(`<option value="${label.replace(/"/g,'&quot;')}"></option>`);
+      }
+      document.getElementById('addr1Suggestions').innerHTML=opts.join('');
+    }catch(e){console.error(e)}
+  },250);
+}
+function applyAddressSuggestion(){
+  const val=document.getElementById('addr1').value;
+  const d=addrSuggestionMap[val];
+  if(!d||!d.address)return;
+  const a=d.address;
+  const road=[a.house_number,a.road].filter(Boolean).join(' ').trim();
+  const cityRaw=a.city||a.town||a.village||a.hamlet||'';
+  const city=cityRaw.replace(/^Town of\s+/i,'').replace(/^City of\s+/i,'').trim();
+  const state=normalizeStateCode(a.state_code||a.state,document.getElementById('country').value||'United States');
+  const zip=(a.postcode||'').trim();
+  if(road)document.getElementById('addr1').value=road;
+  if(city)document.getElementById('city').value=city;
+  if(zip)document.getElementById('zip').value=zip;
+  if(state){const st=document.getElementById('state');if([...st.options].some(o=>o.value===state))st.value=state;}
+  updatePrice();
+  refreshQuoteTax();
+}
+
+async function postApiWithFallback(path, options){
+  const origin=(window.location&&window.location.origin)||'';
+  const fallbackOrigin='https://tees.wulibing.me';
+  const bases=[origin,fallbackOrigin].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+  const tries=[];
+  for(const b of bases){
+    tries.push(`${b}/wp-json${path}`);
+    tries.push(`${b}/index.php?rest_route=${path}`);
+    tries.push(`${b}/?rest_route=${path}`);
+    if(path==='/lmt/v1/order'){ tries.push(`${b}/wp-admin/admin-ajax.php?action=lmt_create_order`); tries.push(`${b}/wp-admin/admin-ajax.php`); }
+  }
+  let lastErr=null;
+  const attempted=[];
+  for(const url of tries){
+    attempted.push(url);
+    try{
+      let req=options;
+      if(path==='/lmt/v1/order' && /\/wp-admin\/admin-ajax\.php$/.test(url)){
+        if(options && options.body instanceof FormData){
+          const fd=new FormData(); options.body.forEach((v,k)=>fd.append(k,v)); fd.append('action','lmt_create_order');
+          req={method:options.method||'POST',body:fd};
+        }else{
+          const payload=(options&&options.body)?options.body:'{}';
+          const fd=new FormData(); fd.append('action','lmt_create_order'); fd.append('payload',payload);
+          req={method:'POST',body:fd};
+        }
+      }
+      const resp=await fetch(url,req);
+      let data=null;
+      try{ data=await resp.json(); }catch(_e){
+        try{ const t=await resp.text(); if(t&&t.trim()!=='0') data={ok:false,message:t.trim()}; }catch(__e){}
+      }
+      if(resp.ok && data && (data?.ok!==false)) return {resp,data,url};
+      const msg=(data&&data.message)?data.message:`HTTP ${resp.status} ${resp.statusText}`;
+      if(resp.status===404 || msg.includes('No route was found')){ lastErr=new Error(msg); continue; }
+      throw new Error(msg||'API failed');
+    }catch(e){ lastErr=e; }
+  }
+  const detail=(lastErr&&lastErr.message)?lastErr.message:'API request failed';
+  throw new Error(`${detail} | Tried: ${attempted.join(' , ')}`);
+}
+
+async function refreshQuoteTax(){
+  if(getQty()<=0) return;
+  try{
+    const q=getQtyDetails();
+    const payload={
+      country:document.getElementById('country').value,
+      state:document.getElementById('state').value,
+      zip:document.getElementById('zip').value.trim(),
+      city:document.getElementById('city').value.trim(),
+      addr1:document.getElementById('addr1').value.trim(),
+      item_type:getSelectedItemType(),
+      material:document.getElementById('material')?.value||'blend',
+      design_mode:order.designMode||'self',
+      adult_qty:q.adult,
+      youth_qty:q.youth
+    };
+    const {data}=await postApiWithFallback('/lmt/v1/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!data?.ok||!data?.quote) return;
+    const quote=data.quote;
+    order.baseCost=Number(quote.base_cost||order.baseCost||0);
+    order.discountedBaseCost=Number(quote.discounted_base_cost||order.discountedBaseCost||0);
+    order.subtotal=Number(quote.subtotal||order.subtotal||0);
+    order.tax=Number(quote.tax||order.tax||0);
+    order.total=Number(quote.total||order.total||0);
+    document.getElementById('baseCost').textContent='$'+order.baseCost.toFixed(2);
+    document.getElementById('discountedBaseCost').textContent='$'+order.discountedBaseCost.toFixed(2);
+    document.getElementById('subtotal').textContent='$'+order.subtotal.toFixed(2);
+    document.getElementById('tax').textContent='$'+order.tax.toFixed(2);
+    document.getElementById('livePrice').textContent='$'+order.total.toFixed(2);
+    if(typeof quote.tax_rate!=='undefined'){document.getElementById('taxRate').textContent=(Number(quote.tax_rate)*100).toFixed(2)+'%';}
+  }catch(e){console.error(e);}
+}
+
+function setOrderItemType(v){order.itemType=v||'tshirt';}
+
+function getSelectedItemType(){ return order.itemType||'tshirt'; }
+function refreshMaterialOptions(){
+  const mSel=document.getElementById('material');
+  if(!mSel) return;
+  const item=getSelectedItemType();
+  const current=mSel.value;
+  const tshirt=[['blend','Cotton-Poly Blend'],['cooling','Cooling Fabric'],['cotton','100% Cotton'],['premium','Premium Heavyweight']];
+  const hoodie=[['blend','Cotton-Poly Fleece'],['cooling','Quick-Dry'],['cotton','100% Cotton'],['premium','Heavyweight'],['thermal','Thermal']];
+  const opts=(item==='hoodie'?hoodie:tshirt).map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+  mSel.innerHTML=opts;
+  if([...mSel.options].some(o=>o.value===current)) mSel.value=current; else mSel.value=(item==='hoodie'?'blend':'blend');
+}
+function isValidEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)}
+function compactSelfLayersForSubmit(layers){const out={tshirt:[],hoodie:[]};for(const g of ['tshirt','hoodie']){for(const layer of (layers[g]||[])){if(layer&&layer.type==='img'){const c={...layer};if(typeof c.src==='string'&&c.src.startsWith('data:image/')) c.src='';out[g].push(c);}else{out[g].push(layer);}}}return out;}
+async function finalizeOrder(){if(orderFinalized){alert('This order is already created. Please refresh the page to start a new order.');return;}if(confirmSubmitting)return;for(const id of ['name','email','phone','addr1','city','state','zip']){if(!document.getElementById(id).value.trim()) return alert('Please complete all required fields.')}if(!isValidEmail(document.getElementById('email').value.trim()))return alert('Please enter a valid email.');if(order.qty<=0)return alert('Please add at least 1 item.');const q=getQtyDetails();const payload={name:document.getElementById('name').value.trim(),email:document.getElementById('email').value.trim(),phone:document.getElementById('phone').value.trim(),country:document.getElementById('country').value,state:document.getElementById('state').value,zip:document.getElementById('zip').value.trim(),city:document.getElementById('city').value.trim(),addr1:document.getElementById('addr1').value.trim(),addr2:document.getElementById('addr2').value.trim(),item_type:getSelectedItemType(),material:document.getElementById('material')?.value||'blend',design_mode:order.designMode||'self',adult_qty:q.adult,youth_qty:q.youth,studio_notes:document.getElementById('studioNotes')?.value||'',studio_item_type:document.getElementById('studioItemType')?.value||'',studio_file_names:[...(document.getElementById('studioImage')?.files||[])].map(f=>f.name),self_layers:compactSelfLayersForSubmit(designLayers),price_snapshot:{baseCost:order.baseCost,discountedBaseCost:order.discountedBaseCost||0,designFee:order.designFee,subtotal:order.subtotal,tax:order.tax,total:order.total}};const btn=document.getElementById('confirmBtn');const hint=document.getElementById('confirmHint');confirmSubmitting=true;if(btn)btn.disabled=true;if(hint)hint.textContent='Please wait, your images and request are being sent to Lee... If you uploaded multiple images, this may take a little longer.';try{const studioFiles=[...(document.getElementById('studioImage')?.files||[])];let reqOptions={method:'POST'};const selfFiles=[...selfUploadFiles];if(studioFiles.length>0||selfFiles.length>0){const formData=new FormData();formData.append('payload',JSON.stringify(payload));for(const f of studioFiles) formData.append('studio_files[]',f,f.name);for(const f of selfFiles) formData.append('self_files[]',f,f.name);reqOptions.body=formData;}else{reqOptions.headers={'Content-Type':'application/json'};reqOptions.body=JSON.stringify(payload);}const {data}=await postApiWithFallback('/lmt/v1/order',reqOptions);if(!data?.ok){throw new Error(data?.message||'Order API failed');}order.orderNumber=data.order_number||('LMT-'+Date.now().toString().slice(-8));orderFinalized=true;if(data?.quote){order.baseCost=Number(data.quote.base_cost||0);order.discountedBaseCost=Number(data.quote.discounted_base_cost||0);order.subtotal=Number(data.quote.subtotal||0);order.tax=Number(data.quote.tax||0);order.total=Number(data.quote.total||0);document.getElementById('baseCost').textContent='$'+order.baseCost.toFixed(2);document.getElementById('discountedBaseCost').textContent='$'+order.discountedBaseCost.toFixed(2);document.getElementById('subtotal').textContent='$'+order.subtotal.toFixed(2);document.getElementById('tax').textContent='$'+order.tax.toFixed(2);document.getElementById('livePrice').textContent='$'+order.total.toFixed(2);}document.getElementById('orderNumber').textContent=order.orderNumber;showStep('payStep');if(hint)hint.textContent='';}catch(err){console.error(err);alert('Could not submit order: '+(err?.message||'Please try again in a moment.'));if(btn)btn.disabled=false;if(hint)hint.textContent='';}finally{confirmSubmitting=false;}}
+function payNow(){document.getElementById('paymentNote').textContent=`Order ${order.orderNumber}: connect your PayPal button/code here.`}
+function emailBeforePay(){const s=encodeURIComponent(`Order ${order.orderNumber} - Customer Message`);window.location.href=`mailto:leemakestees@gmail.com?subject=${s}`}
+let scene,camera,renderer,controls,garmentGroup,tshirtGroup,hoodieGroup,ctx,tex;let viewerInited=false;const teeGLB="https://tees.wulibing.me/wp-content/uploads/2026/05/Short-Sleeve-Tech-Tee_gltf_thin.glb";const hoodieGLB="https://tees.wulibing.me/wp-content/uploads/2026/05/Womans-Loose-Fit-Reglan-Sleeve-Hoodie_gltf_thick.zip.glb";
+function forceResize3D(){if(!renderer||!camera)return;const c=document.getElementById('viewer3d');const w=Math.max(320,c.clientWidth||0);const h=Math.max(360,c.clientHeight||0);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}
+
+function applyTextureToModel(root){if(!root||!tex)return;root.traverse((obj)=>{if(obj.isMesh){obj.castShadow=false;obj.receiveShadow=false;const m=obj.material&&obj.material.clone?obj.material.clone():new THREE.MeshStandardMaterial({});m.color=new THREE.Color(0xffffff);m.roughness=0.85;m.metalness=0.02;m.map=tex;m.side=THREE.FrontSide;m.needsUpdate=true;obj.material=m;}});} 
+function updateModelBaseColor(){if(!garmentGroup)return;garmentGroup.traverse((obj)=>{if(obj.isMesh&&obj.material){if(Array.isArray(obj.material)){obj.material.forEach(m=>{if(m.color)m.color.set('#ffffff');m.needsUpdate=true;});}else{if(obj.material.color)obj.material.color.set('#ffffff');obj.material.needsUpdate=true;}}});}
+
+function fitModel(root,targetY=1.0,targetHeight=1.3){const box=new THREE.Box3().setFromObject(root);const size=new THREE.Vector3();box.getSize(size);const center=new THREE.Vector3();box.getCenter(center);const scale=targetHeight/Math.max(size.y,0.001);root.scale.setScalar(scale);const box2=new THREE.Box3().setFromObject(root);const center2=new THREE.Vector3();box2.getCenter(center2);const min2=new THREE.Vector3();box2.getSize(new THREE.Vector3());min2.copy(box2.min);root.position.x-=center2.x;root.position.z-=center2.z;root.position.y+=(targetY-min2.y);} 
+async function getGLTFLoaderClass(){
+  if(window.__GLTFLoaderClass) return window.__GLTFLoaderClass;
+  const candidates=[
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js',
+    'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'
+  ];
+  let lastErr=null;
+  for(const u of candidates){
+    try{ const mod=await import(/* @vite-ignore */ u); if(mod?.GLTFLoader){window.__GLTFLoaderClass=mod.GLTFLoader; return mod.GLTFLoader;} }
+    catch(e){ lastErr=e; }
+  }
+  throw new Error('GLTFLoader module import failed: '+(lastErr?.message||lastErr));
+}
+
+async function loadGLB(url){
+  const LoaderClass=await getGLTFLoaderClass();
+  const loader=new LoaderClass();
+  if(loader.setCrossOrigin) loader.setCrossOrigin('anonymous');
+  try{
+    return await new Promise((resolve,reject)=>loader.load(url,g=>resolve(g.scene),undefined,reject));
+  }catch(err){
+    const resp=await fetch(url,{mode:'cors',cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status+' while fetching '+url);
+    const blob=await resp.blob();
+    const objUrl=URL.createObjectURL(blob);
+    try{
+      return await new Promise((resolve,reject)=>loader.load(objUrl,g=>resolve(g.scene),undefined,reject));
+    } finally { URL.revokeObjectURL(objUrl); }
+  }
+}
+function init3D(){const c=document.getElementById('viewer3d');const status=document.getElementById('viewerStatus');if(viewerInited){forceResize3D();if(status)status.textContent='3D preview loaded.';return;}const w=c.clientWidth;const h=c.clientHeight;if(!w||!h){if(status)status.textContent='Waiting for viewer area...';setTimeout(init3D,120);return;}if(status)status.textContent='Loading 3D engine...';if(!window.THREE){if(status)status.textContent='3D failed: three.js not loaded (CDN blocked).';c.insertAdjacentHTML('beforeend','<div style="padding:20px;color:#ddd">3D failed to load: CDN script blocked. Please disable script blockers or allow jsdelivr.net.</div>');return;}try{scene=new THREE.Scene();scene.background=new THREE.Color(0x111111);camera=new THREE.PerspectiveCamera(45,c.clientWidth/c.clientHeight,.1,100);camera.position.set(0,1.05,2.45);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(w,h);c.appendChild(renderer.domElement);const OC=window.OrbitControls || (window.THREE && window.THREE.OrbitControls);if(OC){controls=new OC(camera,renderer.domElement);controls.enableDamping=false;controls.rotateSpeed=1.0;controls.target.set(0,1.05,0);controls.minDistance=1.0;controls.maxDistance=5.5;controls.enablePan=true;controls.enableRotate=true;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI;controls.mouseButtons={LEFT:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.PAN};controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};}else{enableDragRotateFallback(renderer.domElement);controls={update:()=>{}};if(status)status.textContent='3D engine ready. Loading garment models...';}scene.add(new THREE.HemisphereLight(0xffffff,0x222222,1.1));const d=new THREE.DirectionalLight(0xffffff,1);d.position.set(2,4,2);scene.add(d);garmentGroup=new THREE.Group();scene.add(garmentGroup);const cvs=document.createElement('canvas');cvs.width=1024;cvs.height=1024;ctx=cvs.getContext('2d');tex=new THREE.CanvasTexture(cvs);tex.flipY=false;tex.wrapS=THREE.RepeatWrapping;tex.wrapT=THREE.RepeatWrapping;tex.needsUpdate=true;(async()=>{const results=await Promise.allSettled([loadGLB(teeGLB),loadGLB(hoodieGLB)]);
+          const teeOk=results[0].status==='fulfilled';
+          const hoodOk=results[1].status==='fulfilled';
+
+          if(teeOk){
+            tshirtGroup=results[0].value;
+            fitModel(tshirtGroup,0.35,1.45);
+            applyTextureToModel(tshirtGroup);
+          }else{
+            tshirtGroup=new THREE.Group();
+            const tee=new THREE.Mesh(new THREE.BoxGeometry(.9,1.1,.4),new THREE.MeshStandardMaterial({color:0xf2f2f2,map:tex}));
+            tee.position.y=1.2;
+            tshirtGroup.add(tee);
+            console.error('T-shirt load failed:',results[0].reason);
+          }
+
+          if(hoodOk){
+            hoodieGroup=results[1].value;
+            fitModel(hoodieGroup,0.33,1.5);
+            applyTextureToModel(hoodieGroup);
+          }else{
+            hoodieGroup=new THREE.Group();
+            const hood=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.2,.5),new THREE.MeshStandardMaterial({color:0xf2f2f2,map:tex}));
+            hood.position.y=1.2;
+            hoodieGroup.add(hood);
+            console.error('Hoodie load failed:',results[1].reason);
+          }
+
+          updateModelBaseColor();
+          hoodieGroup.visible=false;
+          garmentGroup.add(tshirtGroup,hoodieGroup);
+          apply3DChanges();
+
+          if(status){
+            if(teeOk && hoodOk) status.textContent='3D preview loaded.';
+            else if(teeOk && !hoodOk) status.textContent='T-shirt loaded. Hoodie model failed; using hoodie fallback.';
+            else if(!teeOk && hoodOk) status.textContent='Hoodie loaded. T-shirt model failed; using T-shirt fallback.';
+            else status.textContent='Both models failed; using fallback models.';
+          }
+        })();
+window.addEventListener('resize',forceResize3D);viewerInited=true;(function a(){requestAnimationFrame(a);controls.update();renderer.render(scene,camera)})()}catch(err){if(status)status.textContent='3D failed: '+err.message;c.insertAdjacentHTML('beforeend',`<div style="padding:20px;color:#ddd">3D failed to initialize: ${err.message}</div>`);console.error(err);}}
+function addTextLayer(){const text=document.getElementById('customText').value.trim();if(!text)return;const surf=document.getElementById('addSurface').value;const item=document.getElementById('itemType')?.value||'tshirt';const pos=getDefaultPos(item,surf);const layers=currentLayers();layers.push({type:'text',surface:surf,text,x:pos[0],y:pos[1],scale:1,rot:0,color:document.getElementById('textColor').value,font:document.getElementById('fontFamily').value});selectedLayer=layers.length-1;refreshLayerList();apply3DChanges()}
+function onCustomImagesUpload(e){for(const file of [...(e.target.files||[])]){if(file.size>20*1024*1024){alert(`${file.name} is larger than 20MB. Please email me directly for larger files.`);continue;}if(!selfUploadFiles.some(f=>f.name===file.name&&f.size===file.size&&f.lastModified===file.lastModified)){selfUploadFiles.push(file);}const r=new FileReader();r.onload=()=>{const surf=document.getElementById('addSurface').value;const item=document.getElementById('itemType')?.value||'tshirt';const pos=getDefaultPos(item,surf);const probe=new Image();probe.onload=()=>{const maxW=280,maxH=200;const iw=Math.max(1,probe.naturalWidth||probe.width||1);const ih=Math.max(1,probe.naturalHeight||probe.height||1);const k=Math.min(maxW/iw,maxH/ih,1);const layers=currentLayers();layers.push({type:'img',surface:surf,name:file.name,src:r.result,x:pos[0],y:pos[1],scale:1,rot:0,baseW:Math.max(1,Math.round(iw*k)),baseH:Math.max(1,Math.round(ih*k))});selectedLayer=layers.length-1;refreshLayerList();apply3DChanges()};probe.src=r.result};r.readAsDataURL(file)}if(e&&e.target)e.target.value='';}
+function refreshLayerList(){const layers=currentLayers();const list=document.getElementById('assetList');list.innerHTML=layers.map((l,i)=>`<div class="asset-item"><span>${l.type==='text'?'Text: '+l.text:(l.name||('Image '+(i+1)))} (${l.surface||'front'})</span><div class="row"><button class="btn" onclick="selectLayer(${i})">${selectedLayer===i?'Selected':'Select'}</button><button class="btn" onclick="layerUp(${i})">Up</button><button class="btn" onclick="layerDown(${i})">Down</button><button class="btn" onclick="deleteLayer(${i})">Delete</button></div></div>`).join('')||'<span class="muted">No layers yet.</span>'}
+function selectLayer(i){if(selectedLayer===i){selectedLayer=-1;refreshLayerList();return;}selectedLayer=i;const l=currentLayers()[i];if(l&&l.type==='text'){document.getElementById('textColor').value=l.color||'#111111';document.getElementById('fontFamily').value=l.font||'Arial';}refreshLayerList()}
+function moveLayer(dx,dy){if(selectedLayer<0)return;const l=currentLayers()[selectedLayer];l.x=Math.max(20,Math.min(1004,l.x+dx));l.y=Math.max(20,Math.min(1004,l.y+dy));apply3DChanges()}
+function scaleLayer(k){if(selectedLayer<0)return;currentLayers()[selectedLayer].scale*=k;apply3DChanges()}
+function rotateLayer(deg){if(selectedLayer<0)return;currentLayers()[selectedLayer].rot+=deg*Math.PI/180;apply3DChanges()}
+
+function toggleUVDebug(){uvDebug=!uvDebug;const b=document.getElementById('uvBtn');if(b)b.textContent='UV Debug: '+(uvDebug?'On':'Off');apply3DChanges();}
+function drawUVGrid(){const step=64;ctx.clearRect(0,0,1024,1024);ctx.fillStyle='#111';ctx.fillRect(0,0,1024,1024);for(let y=0;y<1024;y+=step){for(let x=0;x<1024;x+=step){const odd=((x/step)+(y/step))%2===0;ctx.fillStyle=odd?'#1f2937':'#0b1220';ctx.fillRect(x,y,step,step);ctx.fillStyle='#93c5fd';ctx.font='12px Arial';ctx.fillText(`${x},${y}`,x+6,y+16);}}ctx.strokeStyle='#22d3ee';ctx.lineWidth=2;ctx.strokeRect(1,1,1022,1022);}
+function apply3DChanges(){if(!ctx)return;if(uvDebug){drawUVGrid();tex.needsUpdate=true;const type=document.getElementById('itemType').value;tshirtGroup.visible=type==='tshirt';hoodieGroup.visible=type==='hoodie';return;}ctx.fillStyle=document.getElementById('shirtColor').value;ctx.fillRect(0,0,1024,1024);const imagePromises=[];for(const layer of currentLayers()){if(layer.type==='text'){ctx.save();ctx.translate(layer.x,layer.y);ctx.rotate(layer.rot);ctx.fillStyle=layer.color;ctx.font=`bold ${Math.max(34,70*layer.scale)}px ${layer.font}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(layer.text,0,0,900);ctx.restore();}else{imagePromises.push(new Promise(res=>{const img=new Image();img.onload=()=>{ctx.save();ctx.translate(layer.x,layer.y);ctx.rotate(layer.rot);const iw=Math.max(1,img.naturalWidth||img.width||1),ih=Math.max(1,img.naturalHeight||img.height||1);const ratio=iw/ih;const defaultW=280,defaultH=Math.max(1,Math.round(defaultW/ratio));const baseW=Math.max(1,layer.baseW||defaultW),baseH=Math.max(1,layer.baseH||defaultH);const w=baseW*layer.scale,h=baseH*layer.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();res();};img.src=layer.src;}));}}Promise.all(imagePromises).then(()=>{tex.needsUpdate=true});tex.needsUpdate=true;const type=document.getElementById('itemType').value;tshirtGroup.visible=type==='tshirt';hoodieGroup.visible=type==='hoodie';}
+function setViewMode(){}
+function layerUp(i){const layers=currentLayers();if(i<=0)return;[layers[i-1],layers[i]]=[layers[i],layers[i-1]];selectedLayer=i-1;refreshLayerList();apply3DChanges();}
+function layerDown(i){const layers=currentLayers();if(i>=layers.length-1)return;[layers[i+1],layers[i]]=[layers[i],layers[i+1]];selectedLayer=i+1;refreshLayerList();apply3DChanges();}
+function deleteLayer(i){const layers=currentLayers();layers.splice(i,1);if(selectedLayer>=layers.length)selectedLayer=layers.length-1;refreshLayerList();apply3DChanges();}
+function updateSelectedTextStyle(){if(selectedLayer<0)return;const l=currentLayers()[selectedLayer];if(!l||l.type!=='text')return;l.color=document.getElementById('textColor').value;l.font=document.getElementById('fontFamily').value;apply3DChanges();}
+
+function enableDragRotateFallback(el){
+  let down=false,lastX=0;
+  el.style.touchAction='none';
+  el.addEventListener('pointerdown',(e)=>{down=true;lastX=e.clientX;el.setPointerCapture&&el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',(e)=>{if(!down||!garmentGroup)return;const dx=e.clientX-lastX;lastX=e.clientX;garmentGroup.rotation.y += dx*0.01;});
+  const end=()=>{down=false};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('pointerleave',end);
+}
+
+// --- pricing override: adult vs youth tables ---
+function getQtyDiscountRate(qty){
+  if(qty>=100) return 0.20;
+  if(qty>=50&&qty<=99) return 0.15;
+  if(qty>=24&&qty<=49) return 0.10;
+  if(qty>=12&&qty<=23) return 0.05;
+  return 0;
+}
+function getQtyDetails(){const rows=[...document.querySelectorAll('#sizeBody tr')];let adult=0,youth=0;for(const r of rows){const label=(r.children[0]?.textContent||'').trim().toLowerCase();const inp=r.querySelector('input');const q=parseInt(inp?.value||'0',10)||0;if(label.startsWith('youth')) youth+=q; else adult+=q;}return {adult,youth,total:adult+youth};}
+function getQty(){return getQtyDetails().total;}
+function updatePrice(){const it=getSelectedItemType();const m=document.getElementById('material')?.value||'blend';const tshirt={blend:19,cooling:25,cotton:35,premium:49};const hoodie={blend:45,cooling:69,cotton:79,premium:99,thermal:119};const tshirtYouth={blend:15,cooling:19,cotton:26,premium:38};const hoodieYouth={blend:35,cooling:49,cotton:59,premium:75,thermal:89};const unitAdult=(it==='hoodie'?hoodie:tshirt)[m]||0;const unitYouth=(it==='hoodie'?hoodieYouth:tshirtYouth)[m]||0;const q=getQtyDetails();order.qty=q.total;order.baseCost=(q.adult*unitAdult)+(q.youth*unitYouth);const discountRate=getQtyDiscountRate(order.qty);order.discountedBaseCost=order.baseCost*(1-discountRate);order.subtotal=order.discountedBaseCost+order.designFee;const taxInfo=calcTax(order.subtotal);order.tax=order.subtotal*taxInfo.rate;order.total=order.subtotal+order.tax;const itemLabel=it==='hoodie'?'Hoodie':'T-Shirt';const matSel=document.getElementById('material');const matLabel=matSel?.options?.[matSel.selectedIndex]?.text||m;document.getElementById('priceItemType').textContent=itemLabel;document.getElementById('priceMaterial').textContent=matLabel;document.getElementById('unitPrice').textContent=`Adult $${unitAdult.toFixed(2)} / Youth $${unitYouth.toFixed(2)}`;document.getElementById('priceQty').textContent=`${order.qty} (Adult ${q.adult} / Youth ${q.youth})`;document.getElementById('baseCost').textContent='$'+order.baseCost.toFixed(2);document.getElementById('qtyDiscount').textContent=(discountRate*100).toFixed(0)+'%'+(discountRate?' off':' (No discount)');document.getElementById('discountedBaseCost').textContent='$'+order.discountedBaseCost.toFixed(2);document.getElementById('designFee').textContent='$'+order.designFee.toFixed(2);document.getElementById('subtotal').textContent='$'+order.subtotal.toFixed(2);document.getElementById('taxRate').textContent=taxInfo.known?(taxInfo.rate*100).toFixed(2)+'%':'Unknown (0%)';document.getElementById('tax').textContent='$'+order.tax.toFixed(2);document.getElementById('livePrice').textContent='$'+order.total.toFixed(2);}
+
+
+const selfBtn=document.getElementById('chooseSelfBtn');
+const studioBtn=document.getElementById('chooseStudioBtn');
+if(selfBtn)selfBtn.addEventListener('click',()=>chooseDesign('self'));
+if(studioBtn)studioBtn.addEventListener('click',()=>chooseDesign('studio'));
+
+renderSizes();populateStates();refreshMaterialOptions();const m=document.getElementById('material');if(m)m.value='blend';updatePrice();
+</script></body></html>
